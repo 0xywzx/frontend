@@ -1,5 +1,5 @@
 {
-  "name": "eth-todo-list-react",
+  "name": "frontend",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -7,7 +7,7 @@
     "react": "^16.8.3",
     "react-bootstrap": "^1.0.0-beta.5",
     "react-dom": "^16.8.3",
-    "react-scripts": "2.1.5",
+    "react-scripts": "^2.1.8",
     "web3": "^1.0.0-beta.46"
   },
   "scripts": {

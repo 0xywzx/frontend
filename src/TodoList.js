@@ -23,7 +23,7 @@ class TodoList extends Component {
         <ul id="taskList" className="list-unstyled">
           { this.props.tasks.map((task, key) => {
             return(
-              <div className="taskTemplate" className="checkbox" key={key}>
+              <div className={["taskTemplate", "checkbox"]} key={key}>
                 <label>
                   <input
                   type="checkbox"
@@ -33,7 +33,7 @@ class TodoList extends Component {
                     this.checkbox = input
                   }}
                   onClick={(event) => {
-                    this.props.toggleCompleted(this.checkbox.name) }}/>
+                    this.props.toggleCompleted(task.id) }}/>
                   <span className="content">{task.content}</span>
                 </label>
               </div>
