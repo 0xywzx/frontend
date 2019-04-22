@@ -1,6 +1,20 @@
-export const TODO_LIST_ADDRESS = '0x399fac7706f895d2695f8b1f3728b954f89a4866'
+export const PLACE_LIST_ADDRESS = '0x515f55d710871b1751910273175b78a130091b90'
 
-export const TODO_LIST_ABI = [
+export const PLACE_LIST_ABI = [
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "userCount",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
   {
     "constant": true,
     "inputs": [
@@ -9,30 +23,37 @@ export const TODO_LIST_ABI = [
         "type": "uint256"
       }
     ],
-    "name": "tasks",
+    "name": "checkins",
     "outputs": [
       {
-        "name": "id",
+        "name": "placeid",
         "type": "uint256"
       },
       {
-        "name": "content",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "name": "checkintime",
+        "type": "uint256"
+      },
+      {
+        "name": "latitude",
         "type": "string"
       },
       {
-        "name": "completed",
-        "type": "bool"
+        "name": "longitude",
+        "type": "string"
       }
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0x8d977672"
+    "type": "function"
   },
   {
     "constant": true,
     "inputs": [],
-    "name": "taskCount",
+    "name": "placeCount",
     "outputs": [
       {
         "name": "",
@@ -41,71 +62,74 @@ export const TODO_LIST_ABI = [
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function",
-    "signature": "0xb6cb58a5"
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "places",
+    "outputs": [
+      {
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "name": "completed",
+        "type": "bool"
+      },
+      {
+        "name": "latitude",
+        "type": "string"
+      },
+      {
+        "name": "longitude",
+        "type": "string"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
-    "type": "constructor",
-    "signature": "constructor"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "name": "content",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "name": "completed",
-        "type": "bool"
-      }
-    ],
-    "name": "TaskCreated",
-    "type": "event",
-    "signature": "0x05d0fb833127fc08168556d0e7ca9554fc3f6bc843b3b7d2bf1c35aea6bab660"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "name": "completed",
-        "type": "bool"
-      }
-    ],
-    "name": "TaskCompleted",
-    "type": "event",
-    "signature": "0xe21fa966ca5cd02748c0752352d18c48165e61cb55b4c29cccf924b5a95fcff1"
+    "type": "constructor"
   },
   {
     "constant": false,
     "inputs": [
       {
-        "name": "_content",
+        "name": "_name",
+        "type": "string"
+      },
+      {
+        "name": "_latitude",
+        "type": "string"
+      },
+      {
+        "name": "_longitude",
         "type": "string"
       }
     ],
-    "name": "createTask",
+    "name": "createPlace",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
-    "type": "function",
-    "signature": "0x111002aa"
+    "type": "function"
   },
   {
     "constant": false,
@@ -119,7 +143,28 @@ export const TODO_LIST_ABI = [
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
-    "type": "function",
-    "signature": "0x455f5024"
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "placeid",
+        "type": "uint256"
+      },
+      {
+        "name": "_latitude",
+        "type": "string"
+      },
+      {
+        "name": "_longitude",
+        "type": "string"
+      }
+    ],
+    "name": "userCheckIn",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ]

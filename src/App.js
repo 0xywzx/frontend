@@ -1,59 +1,133 @@
 import React, { Component } from 'react'
-import Web3 from 'web3'
+import web3 from './web3.js'
 import './App.css'
-import { TODO_LIST_ABI, TODO_LIST_ADDRESS } from './config'
-import TodoList from './TodoList'
+import { PLACE_LIST_ABI, PLACE_LIST_ADDRESS } from './config'
+import PlaceList from './PlaceList'
+import CheckinList from './CheckinList'
+import FilteredCheckinList from './FilteredCheckinList'
+
+const placeList = new web3.eth.Contract(PLACE_LIST_ABI, PLACE_LIST_ADDRESS)
 
 class App extends Component {
   componentWillMount() {
     this.loadBlockchainData()
   }
 
-  async loadBlockchainData() {
-    const web3 = new Web3(Web3.givenProvider || "http://localhost:7545")
-    const accounts = await web3.eth.getAccounts()
-    this.setState({ account: accounts[0] })
-    const todoList = new web3.eth.Contract(TODO_LIST_ABI, TODO_LIST_ADDRESS)
-    this.setState({ todoList })
-    const taskCount = await todoList.methods.taskCount().call()
-    this.setState({ taskCount })
-
-    for (var i = 1; i <= taskCount; i++) {
-      const task = await todoList.methods.tasks(i).call()
+  async loadBlockchainData() {   
+    this.setState({ placeList })
+    
+    const placeCount = await placeList.methods.placeCount().call()
+    this.setState({ placeCount })
+    for (var i = 1; i <= placeCount; i++) {
+      const place = await placeList.methods.places(i).call()
       this.setState({
-        tasks: [...this.state.tasks, task]
+        places: [...this.state.places, place]
       })
     }
+
+    const userCount = await placeList.methods.userCount().call()
+    this.setState({ userCount })
+    for (var k = 1; k <= userCount; k++) {
+      const checkin = await placeList.methods.checkins(k).call()
+      checkin.checkintime  = new Date(checkin.checkintime * 1000).toLocaleString()
+      this.setState({
+        checkins: [...this.state.checkins, checkin]
+      })
+    }
+
+    await navigator.geolocation.getCurrentPosition(
+      position => this.setState({ 
+        latitude: position.coords.latitude, 
+        longitude: position.coords.longitude,
+      }), 
+      err => console.log(err)
+    );
+
     this.setState({ loading: false })
+    this.setState({ filtering: false })
   }
 
   constructor(props) {
     super(props)
     this.state = {
       account: '',
-      taskCount: 0,
-      tasks: [],
-      loading: true
+      placeCount: 0,
+      places: [],
+      userCount: 0,
+      checkins: [],
+      filtering: true,
+      filteredCheckins: [],
+      latitude: null,
+      longitude: null,
+      loading: true,
     }
 
-    this.createTask = this.createTask.bind(this)
-    this.toggleCompleted = this.toggleCompleted.bind(this)
+    this.createPlace = this.createPlace.bind(this)
+    this.userCheckIn = this.userCheckIn.bind(this)
+    this.handleFilterVal = this.handleFilterVal.bind(this)
   }
 
-  createTask(content) {
+  createPlace = async (name) => {
+    const accounts = await web3.eth.getAccounts()
+    this.setState({ account: accounts[0] })
     this.setState({ loading: true })
-    this.state.todoList.methods.createTask(content).send({ from: this.state.account })
+
+    await navigator.geolocation.getCurrentPosition(
+      position => this.setState({ 
+        latitude: position.coords.latitude, 
+        longitude: position.coords.longitude,
+      }), 
+      err => console.log(err)
+    );
+    const latitude = String(this.state.latitude);
+    const longitude = String(this.state.longitude);
+
+    this.state.placeList.methods.createPlace(name, latitude, longitude).send({ from: this.state.account })
     .once('receipt', (receipt) => {
       this.setState({ loading: false })
     })
   }
 
-  toggleCompleted(taskId) {
+  userCheckIn = async (placeId) => {
+    const accounts = await web3.eth.getAccounts()
+    this.setState({ account: accounts[0] })
     this.setState({ loading: true })
-    this.state.todoList.methods.toggleCompleted(taskId).send({ from: this.state.account })
+
+    await navigator.geolocation.getCurrentPosition(
+      position => this.setState({ 
+        latitude: position.coords.latitude, 
+        longitude: position.coords.longitude,
+      }), 
+      err => console.log(err)
+    );
+    const latitude = String(this.state.latitude);
+    const longitude = String(this.state.longitude);
+
+    this.state.placeList.methods.userCheckIn(placeId, latitude, longitude).send({ from: this.state.account })
     .once('receipt', (receipt) => {
       this.setState({ loading: false })
     })
+  }
+
+  handleFilterVal(val) {
+    const line = this.state.checkins.filter((item) => (
+       item.placeid.indexOf( val ) >= 0
+    ));
+    this.setState({
+      filteredCheckins: line,
+      filtering: true
+    });
+  }
+  
+  position = async () => {
+    await navigator.geolocation.getCurrentPosition(
+      position => this.setState({ 
+        latitude: position.coords.latitude, 
+        longitude: position.coords.longitude,
+      }), 
+      err => console.log(err)
+    );
+    console.log(this.state.latitude)
   }
 
   render() {
@@ -70,15 +144,36 @@ class App extends Component {
         <div className="container-fluid">
           <div className="row">
             <main role="main" className="col-lg-12 d-flex justify-content-center">
-              { this.state.loading
-                ? <div id="loader" className="text-center"><p className="text-center">Loading...</p></div>
-                : <TodoList
-                  tasks={this.state.tasks}
-                  createTask={this.createTask}
-                  toggleCompleted={this.toggleCompleted} />
+              { this.state.loading ? <
+                 div id="loader" className="text-center"><p className="text-center">Loading...</p></div
+                 > : <
+                  PlaceList
+                  places={this.state.places}
+                  createPlace={this.createPlace}
+                  userCheckIn={this.userCheckIn}
+                  handleRefrsh={this.handleRefrsh}
+                />
               }
             </main>
           </div>
+          <div className="row">
+            <main role="main" className="col-lg-12 d-flex justify-content-center">
+              { this.state.loading ? (
+                <p></p>
+                ) : ( this.state.filtering
+                  ?<FilteredCheckinList 
+                    filteredCheckins={this.state.filteredCheckins}
+                    handleFilterVal={this.handleFilterVal}
+                    />
+                  :<CheckinList 
+                    checkins={this.state.checkins}
+                    handleFilterVal={this.handleFilterVal}
+                    />  
+                  )
+              } 
+            </main>
+           </div>   
+          <button onClick={this.position} className='Filter'>Filter</button>
         </div>
       </div>
     );
